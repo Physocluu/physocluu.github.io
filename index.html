@@ -12,11 +12,15 @@
   *{box-sizing:border-box;margin:0;padding:0;}
   html{background:#07140E;-webkit-text-size-adjust:100%;}
   body{background:var(--ink);color:var(--paper);font-family:'IBM Plex Mono',monospace;min-height:100vh;display:flex;justify-content:center;padding:0 24px 64px;position:relative;overflow-x:hidden;}
-  .traces{position:fixed;inset:0;z-index:0;pointer-events:none;}
-  .traces svg{width:100%;height:100%;display:block;}
-  .trace-line{fill:none;stroke-linecap:round;}
-  .tracer{fill:none;stroke-linecap:round;}
-  .glow{position:fixed;left:50%;top:-10vmax;width:90vmax;height:90vmax;transform:translateX(-50%);background:radial-gradient(circle,var(--pine) 0%,transparent 60%);opacity:.6;z-index:0;pointer-events:none;}
+  /* Neutral frosted-glass backdrop — charcoal wash + two slow-drifting lime/mint glows.
+     Replaces the old moving contour-line field; the atom mark is the only motion left
+     that's tied to content. */
+  .glass-bg{position:fixed;inset:0;z-index:0;pointer-events:none;background:linear-gradient(160deg,#2A2E35 0%,#1B1E24 55%,#14171C 100%);overflow:hidden;}
+  .glass-bg::before,.glass-bg::after{content:"";position:absolute;border-radius:50%;filter:blur(70px);}
+  .glass-bg::before{width:70vmax;height:70vmax;left:-16vmax;top:-20vmax;background:radial-gradient(circle,rgba(191,243,106,.32),transparent 65%);animation:driftA 26s ease-in-out infinite;}
+  .glass-bg::after{width:64vmax;height:64vmax;right:-18vmax;bottom:-16vmax;background:radial-gradient(circle,rgba(90,209,160,.28),transparent 65%);animation:driftB 22s ease-in-out infinite;}
+  @keyframes driftA{0%,100%{transform:translate(0,0) scale(1);}50%{transform:translate(5vmax,4vmax) scale(1.08);}}
+  @keyframes driftB{0%,100%{transform:translate(0,0) scale(1);}50%{transform:translate(-4vmax,-5vmax) scale(1.06);}}
   .corner{position:fixed;z-index:3;}
   .corner.tl{top:0;left:0;width:84px;height:11px;background:var(--forest);}
   .corner.tl::after{content:"";position:absolute;top:0;left:0;width:11px;height:84px;background:var(--forest);}
@@ -42,13 +46,12 @@
   .link .label{flex:1;}.link .arrow{opacity:.5;font-size:13px;}
   .handle{margin-top:34px;font-size:13px;letter-spacing:1.5px;color:var(--mint);text-align:center;}
   @media (prefers-reduced-motion:no-preference){.wrap>*{animation:rise .55s cubic-bezier(.2,.7,.3,1) backwards;}.hero{animation-delay:.02s;}.wordmark{animation-delay:.08s;}.tagline{animation-delay:.12s;}.links{animation-delay:.16s;}.handle{animation-delay:.24s;}@keyframes rise{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}}
-  @media (prefers-reduced-motion:reduce){.spin-cw,.spin-ccw,.spin-cw2,.tracer{animation:none!important;}}
+  @media (prefers-reduced-motion:reduce){.spin-cw,.spin-ccw,.spin-cw2,.glass-bg::before,.glass-bg::after{animation:none!important;}}
   @media (max-width:380px){.wordmark{font-size:44px;}.hero{width:124px;height:124px;}}
 </style>
 </head>
 <body>
-<div class="glow" aria-hidden="true"></div>
-<div class="traces" aria-hidden="true"><svg id="tracefield" viewBox="0 0 460 920" preserveAspectRatio="xMidYMid slice"></svg></div>
+<div class="glass-bg" aria-hidden="true"></div>
 <span class="corner tl" aria-hidden="true"></span>
 <span class="corner br" aria-hidden="true"></span>
 <main class="wrap">
@@ -86,37 +89,9 @@
     <a class="link" href="#REPLACE_tiktok"><span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1.04-.1z"/></svg></span><span class="label">TikTok</span><span class="arrow">↗</span></a>
     <a class="link" href="#REPLACE_linkedin"><span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg></span><span class="label">LinkedIn</span><span class="arrow">↗</span></a>
     <a class="link" href="#REPLACE_community"><span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg></span><span class="label">Join the group chat</span><span class="arrow">↗</span></a>
-    <a class="link" href="mailto:REPLACE@example.com"><span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></span><span class="label">Email the committee</span><span class="arrow">↗</span></a>
+    <a class="link" href="/cdn-cgi/l/email-protection#3e6c7b6e727f7d7b7e5b465f534e525b105d5153"><span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></span><span class="label">Email the committee</span><span class="arrow">↗</span></a>
   </nav>
   <div class="handle">@physocluu</div>
 </main>
-<script>
-(function(){
-  const svg=document.getElementById('tracefield');if(!svg)return;
-  const W=460,H=920,ns='http://www.w3.org/2000/svg';
-  const colours=['#2E7D32','#1B5E20','#0F3322','#8BC34A','#5AD1A0'];
-  function curve(){const y0=Math.random()*H,c1x=80+Math.random()*120,c1y=Math.random()*H,c2x=280+Math.random()*120,c2y=Math.random()*H,y1=Math.random()*H;return `M-40 ${y0.toFixed(0)} C ${c1x.toFixed(0)} ${c1y.toFixed(0)}, ${c2x.toFixed(0)} ${c2y.toFixed(0)}, 500 ${y1.toFixed(0)}`;}
-  for(let i=0;i<7;i++){
-    const d=curve(),col=colours[i%colours.length];
-    const base=document.createElementNS(ns,'path');
-    base.setAttribute('d',d);base.setAttribute('class','trace-line');base.setAttribute('stroke',col);
-    base.setAttribute('stroke-width',(1+Math.random()*1.5).toFixed(1));
-    base.setAttribute('opacity',(0.10+Math.random()*0.12).toFixed(2));
-    svg.appendChild(base);
-    if(i%3===0){
-      const tracer=document.createElementNS(ns,'path');
-      tracer.setAttribute('d',d);tracer.setAttribute('class','tracer');
-      tracer.setAttribute('stroke','#BFF36A');tracer.setAttribute('stroke-width','3');
-      const len=base.getTotalLength();
-      tracer.style.strokeDasharray=`3 ${len}`;
-      const dur=(10+Math.random()*10).toFixed(1);
-      tracer.style.animation=`dash-${i} ${dur}s linear infinite`;
-      const style=document.createElementNS(ns,'style');
-      style.textContent=`@keyframes dash-${i}{from{stroke-dashoffset:${len};}to{stroke-dashoffset:0;}}`;
-      svg.appendChild(style);svg.appendChild(tracer);
-    }
-  }
-})();
-</script>
-</body>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script></body>
 </html>
